@@ -9,7 +9,7 @@ namespace TAIExercise
 {
 	internal class RiskAssessmentOptions
 	{
-		internal readonly Boolean HasHeader;
+		internal readonly Boolean HasHeader = true;
 		internal readonly Decimal RiskThreshold = 300000;
 		internal readonly Int32 IdColumn = 0;
 		internal readonly Int32 LastNameColumn = 1;
@@ -17,21 +17,66 @@ namespace TAIExercise
 		internal readonly Int32 FaceAmountColumn = 11;
 		internal readonly Int32 CashValueColumn = 12;
 		internal readonly String Separator = ",";
-		internal readonly String InputFile = String.Empty;
-		internal readonly String OutputFile = String.Empty;
+		internal readonly String InputFile = "C:/Temp/ClientCoveragePolicy.csv";
+		internal readonly String OutputFile = "C:/Temp/RiskAssessment.csv";
 
 		public RiskAssessmentOptions()
 		{
-			Boolean.TryParse(ConfigurationManager.AppSettings["hasHeader"], out HasHeader);
-			Int32.TryParse(ConfigurationManager.AppSettings["idColumn"], out IdColumn);
-			Int32.TryParse(ConfigurationManager.AppSettings["lastNameColumn"], out LastNameColumn);
-			Int32.TryParse(ConfigurationManager.AppSettings["firstNameColumn"], out FirstNameColumn);
-			Int32.TryParse(ConfigurationManager.AppSettings["faceAmountColumn"], out FaceAmountColumn);
-			Int32.TryParse(ConfigurationManager.AppSettings["cashValueColumn"], out CashValueColumn);
-			Decimal.TryParse(ConfigurationManager.AppSettings["riskThreshold"], out RiskThreshold);
-			Separator = ConfigurationManager.AppSettings["separator"];
-			InputFile = ConfigurationManager.AppSettings["inputFile"];
-			OutputFile = ConfigurationManager.AppSettings["outputFile"];
+			String header = ConfigurationManager.AppSettings["hasHeader"];
+			String id = ConfigurationManager.AppSettings["idColumn"];
+			String last = ConfigurationManager.AppSettings["lastNameColumn"];
+			String first = ConfigurationManager.AppSettings["firstNameColumn"];
+			String face = ConfigurationManager.AppSettings["faceAmountColumn"];
+			String cash = ConfigurationManager.AppSettings["cashValueColumn"];
+			String risk = ConfigurationManager.AppSettings["riskThreshold"];
+			String sep = ConfigurationManager.AppSettings["separator"];
+			String input = ConfigurationManager.AppSettings["inputFile"];
+			String output = ConfigurationManager.AppSettings["outputFile"];
+
+			if (String.IsNullOrWhiteSpace(header) || !Boolean.TryParse(header, out HasHeader))
+			{
+				HasHeader = true;
+			}
+			if (String.IsNullOrWhiteSpace(id) || !Int32.TryParse(id, out IdColumn))
+			{
+				IdColumn = 0;
+			}
+			if (String.IsNullOrWhiteSpace(last) || !Int32.TryParse(last, out LastNameColumn))
+			{
+				LastNameColumn = 1;
+			}
+			if (String.IsNullOrWhiteSpace(first) || !Int32.TryParse(first, out FirstNameColumn))
+			{
+				FirstNameColumn = 2;
+			}
+			if (String.IsNullOrWhiteSpace(face) || !Int32.TryParse(face, out FaceAmountColumn))
+			{
+				FaceAmountColumn = 11;
+			}
+			if (String.IsNullOrWhiteSpace(cash) || !Int32.TryParse(cash, out CashValueColumn))
+			{
+				CashValueColumn = 12;
+			}
+			if (String.IsNullOrWhiteSpace(risk) || !Decimal.TryParse(risk, out RiskThreshold))
+			{
+				RiskThreshold = 300000;
+			}
+			if (!String.IsNullOrWhiteSpace(sep))
+			{
+				Separator = sep;
+			}
+			if (!String.IsNullOrWhiteSpace(input))
+			{
+				InputFile = input;
+			}
+			if (!String.IsNullOrWhiteSpace(output))
+			{
+				OutputFile = output;
+			}
+			if (!File.Exists(InputFile))
+			{
+				throw new ArgumentException($"Input File {InputFile} does not exist.");
+			}
 		}
 
 		public RiskAssessmentOptions(Boolean hasHeader, Decimal riskThreshold, Int32 idColumn, Int32 lastNameColumn, Int32 firstNameColumn, Int32 faceAmountColumn, Int32 cashValueColumn, String separator, String inputFile, String outputFile)

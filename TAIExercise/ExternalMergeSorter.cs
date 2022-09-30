@@ -1,4 +1,4 @@
-﻿/* Open source project from https://github.com/joseftw/jos.files/tree/develop/src/JOS.ExternalMergeSort
+﻿/* Open source class from https://github.com/joseftw/jos.files/tree/develop/src/JOS.ExternalMergeSort
  */
 
 

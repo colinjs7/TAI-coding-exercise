@@ -14,15 +14,11 @@ namespace TAIExercise
 		private readonly String _tempPath = "C:/Temp/riskFiles";
 		private readonly String _sortedById = "sortedById.csv";
 		private readonly String _evaluated = "evaluated.csv";
-		private readonly RiskAssessmentOptions _options = new RiskAssessmentOptions();
+		private readonly RiskAssessmentOptions _options = null;
 
-		public RiskAssessment()
+		public RiskAssessment(RiskAssessmentOptions options = null)
 		{
-			_options = new RiskAssessmentOptions();
-		}
-		public RiskAssessment(RiskAssessmentOptions options)
-		{
-			_options = options;
+			_options = options ?? new RiskAssessmentOptions();
 		}
 		
 		public async Task AssessFile()
@@ -36,7 +32,7 @@ namespace TAIExercise
 			Cleanup();
 		}
 
-		public void Cleanup()
+		private void Cleanup()
 		{
 			if (File.Exists(_sortedById))
 			{
@@ -102,11 +98,11 @@ namespace TAIExercise
 						{
 							if (!Decimal.TryParse(row[_options.FaceAmountColumn], out Decimal rowFace))
 							{
-								throw new Exception($"Face Amount must be a number. Client: {row[_options.LastNameColumn]}, {row[_options.FirstNameColumn]}");
+								throw new Exception($"Face Amount must be a number. Client: {row[_options.IdColumn]}");
 							}
 							if (!Decimal.TryParse(row[_options.CashValueColumn], out Decimal rowCash))
 							{
-								throw new Exception($"Cash Value must be a number. Client: {row[_options.LastNameColumn]}, {row[_options.FirstNameColumn]}");
+								throw new Exception($"Cash Value must be a number. Client: {row[_options.IdColumn]}");
 							}
 
 							totalFace += rowFace;
@@ -120,8 +116,7 @@ namespace TAIExercise
 							sw.WriteLine($"{client[0][_options.IdColumn]},{client[0][_options.LastNameColumn]},{client[0][_options.FirstNameColumn]}, {risk}");
 						}
 
-						client = new List<String[]>();
-						client.Add(fields);
+						client = new List<String[]> { fields };
 					}
 				}
 			}
@@ -139,14 +134,9 @@ namespace TAIExercise
 				Directory.CreateDirectory(_tempPath);
 			}
 
-			if (!File.Exists(_options.InputFile))
-			{
-				throw new ArgumentNullException($"Input File {_options.InputFile} does not exist.");
-			}
-
 			ExternalMergeSorterOptions options = new ExternalMergeSorterOptions()
 			{
-				FileLocation = "C:/Temp/riskFiles"
+				FileLocation = _tempPath
 			};
 
 			ExternalMergeSorter sorter = new ExternalMergeSorter(options);
