@@ -1,4 +1,4 @@
 ﻿using TAIExercise;
 
 RiskAssessment risk = new RiskAssessment();
-await risk.AssessFile();
+await risk.RunAssessment();

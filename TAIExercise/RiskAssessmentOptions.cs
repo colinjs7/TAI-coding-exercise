@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TAIExercise
 {
-	internal class RiskAssessmentOptions
+	public class RiskAssessmentOptions
 	{
 		internal readonly Boolean HasHeader = true;
 		internal readonly Decimal RiskThreshold = 300000;

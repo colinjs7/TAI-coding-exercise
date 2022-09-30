@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace TAIExercise
 {
-	internal class RiskAssessment
+	public class RiskAssessment
 	{
 		private readonly String _tempPath = "C:/Temp/riskFiles";
 		private readonly String _sortedById = "sortedById.csv";
@@ -21,14 +21,18 @@ namespace TAIExercise
 			_options = options ?? new RiskAssessmentOptions();
 		}
 		
-		public async Task AssessFile()
+		public async Task RunAssessment()
 		{
+			//Sort by Id first
 			await SortById();
 
+			//Read lines per Id, evaluate, write if necessary
 			EvaluateFile();
 
+			//Sort _evaluated file by risk amount and Id
 			await SortByRiskAmountAndId();
 
+			//Delete temp files and folders
 			Cleanup();
 		}
 
@@ -54,6 +58,7 @@ namespace TAIExercise
 			{
 				Sort = new ExternalMergeSortSortOptions()
 				{
+					//Sort the _evaluated file by Risk desc (column 3) and Id (column 0)
 					Comparer = new CsvAmountAndIdColumnSorter(3, 0, true, _options.Separator)
 				},
 				FileLocation = _tempPath
@@ -64,7 +69,7 @@ namespace TAIExercise
 			using (FileStream unsortedFile = File.OpenRead(Path.Combine(_tempPath, _evaluated)))
 			using (FileStream targetFile = File.Create(_options.OutputFile))
 			{
-				//Add header to output file
+				//Add header to final output file
 				targetFile.Write(Encoding.ASCII.GetBytes("ID,LastName,FirstName,RiskAmount\n"));
 				await sorter.Sort(unsortedFile, targetFile, CancellationToken.None);
 			}
@@ -82,14 +87,18 @@ namespace TAIExercise
 					String line = sr.ReadLine();
 					String[] fields = line.Split(_options.Separator);
 
-					if (client.Count == 0 || (client[0][_options.LastNameColumn] == fields[_options.LastNameColumn] &&
-						client[0][_options.FirstNameColumn] == fields[_options.FirstNameColumn]))
+					//If there is no current client OR the id from the new fields matches the current client id, add the fields
+					if (client.Count == 0 || (client[0][_options.IdColumn] == fields[_options.IdColumn]))
 					{
 						client.Add(fields);
 					}
 					else
 					{
-						//Compute, evaluate and write to file
+						//fields is a new client.
+						//Compute and evaluate current client
+						//Write to file if above threshold
+						//Reinitialize client with fields
+
 						Decimal totalFace = 0;
 						Decimal totalCash = 0;
 						Decimal risk = 0;
@@ -116,6 +125,7 @@ namespace TAIExercise
 							sw.WriteLine($"{client[0][_options.IdColumn]},{client[0][_options.LastNameColumn]},{client[0][_options.FirstNameColumn]}, {risk}");
 						}
 
+						//Set next client
 						client = new List<String[]> { fields };
 					}
 				}
@@ -124,6 +134,7 @@ namespace TAIExercise
 
 		private async Task SortById()
 		{
+			//Check directories
 			if (!Directory.Exists(Path.GetDirectoryName(_options.OutputFile)))
 			{
 				Directory.CreateDirectory(Path.GetDirectoryName(_options.OutputFile));
@@ -144,6 +155,7 @@ namespace TAIExercise
 			using (FileStream unsortedFile = File.OpenRead(_options.InputFile))
 			using (FileStream targetFile = File.Create(Path.Combine(_tempPath, _sortedById)))
 			{
+				//A header should not be sorted with the rest of the lines
 				//if there is a Header on the file, move the reader forward
 				if (_options.HasHeader)
 				{
